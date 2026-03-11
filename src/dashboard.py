@@ -10,7 +10,9 @@ import json
 st.set_page_config(page_title="네모 부동산 매물 대시보드", layout="wide")
 
 # ── 경로 및 설정 ──────────────────────────────────────────
-DB_PATH = "data/nemo_stores.db"
+# 현재 파일(src/dashboard.py)의 상위 폴더(src/)의 상위 폴더(root)를 기준으로 경로 설정
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DB_PATH = os.path.join(BASE_DIR, "data", "nemo_stores.db")
 
 # 지하철역 좌표 매핑
 SUBWAY_COORDS = {
@@ -248,20 +250,6 @@ with main_col2:
             st.write(f"**지하철**: {item['nearSubwayStation']}")
             st.write(f"**조회/관심**: 👀 {item['viewCount']}개 / ❤️ {item['favoriteCount']}개")
             
-            # 비교 목록 관리
-            if 'compare_ids' not in st.session_state:
-                st.session_state['compare_ids'] = []
-            
-            is_compared = item['id'] in st.session_state['compare_ids']
-            if st.button("➕ 비교 목록에 추가" if not is_compared else "➖ 비교 목록에서 제거"):
-                if is_compared:
-                    st.session_state['compare_ids'].remove(item['id'])
-                else:
-                    if len(st.session_state['compare_ids']) < 5:
-                        st.session_state['compare_ids'].append(item['id'])
-                    else:
-                        st.warning("최대 5개까지 비교 가능합니다.")
-                st.rerun()
 
             if len(img_urls) > 1:
                 with st.expander("📸 추가 사진 보기"):
@@ -271,22 +259,6 @@ with main_col2:
     else:
         st.info("데이터가 없습니다.")
 
-# ── 매물 비교 섹션 (선택된 경우) ───────────────────────────
-if st.session_state.get('compare_ids'):
-    st.markdown("---")
-    st.subheader("⚖️ 매물 비교 (Property Comparison)")
-    compare_df = df[df['id'].isin(st.session_state['compare_ids'])]
-    
-    # 비교 항목 선택
-    compare_cols = ["title", "deposit", "monthlyRent", "premium", "rentPerSize", "size", "floor", "nearSubwayStation"]
-    display_compare = compare_df[compare_cols].copy()
-    display_compare.columns = ["매물명", "보증금", "월세", "권리금", "평당가", "면적", "층수", "지하철"]
-    
-    st.table(display_compare.set_index("매물명"))
-    
-    if st.button("비교 목록 초기화"):
-        st.session_state['compare_ids'] = []
-        st.rerun()
 
 st.markdown("---")
 st.subheader("📊 필터링 데이터 분석 및 목록")
