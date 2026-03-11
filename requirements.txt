@@ -1,0 +1,7 @@
+streamlit
+pandas
+plotly
+matplotlib
+koreanize-matplotlib
+scikit-learn
+tabulate
